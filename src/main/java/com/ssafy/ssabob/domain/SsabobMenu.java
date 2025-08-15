@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
-public class LunchMenu {
+public class SsabobMenu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //db가 id를 자동으로 생성하고 관리하게 만드는 기능
     private Long id;

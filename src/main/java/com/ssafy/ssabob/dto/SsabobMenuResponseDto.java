@@ -1,12 +1,12 @@
 package com.ssafy.ssabob.dto;
 
-import com.ssafy.ssabob.domain.LunchMenu;
+import com.ssafy.ssabob.domain.SsabobMenu;
 import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Getter
-public class LunchMenuResponseDto {
+public class SsabobMenuResponseDto {
     // 클라이언트에게 보여줄 데이터만 선별해서 필드로 선언
     private final LocalDate menuDate;
     private final String campus;
@@ -17,7 +17,7 @@ public class LunchMenuResponseDto {
     private final String salad10f;
 
     // Entity를 DTO로 변환하는 생성자
-    public LunchMenuResponseDto(LunchMenu entity) {
+    public SsabobMenuResponseDto(SsabobMenu entity) {
         this.menuDate = entity.getMenuDate();
         this.campus = entity.getCampus();
         this.koreanFood20f = entity.getKoreanFood20f();
