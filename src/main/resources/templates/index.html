@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>SSABOB - 로그인</title>
+</head>
+<body>
+<div class="container">
+    <h1>로그인</h1>
+    <form action="/login" method="post">
+        <div>
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="region">지역</label>
+            <input type="text" id="region" name="region" required>
+        </div>
+        <div>
+            <label for="classInfo">반</label>
+            <input type="text" id="classInfo" name="classInfo" required>
+        </div>
+        <button type="submit">로그인</button>
+    </form>
+    <div th:if="${param.error}" style="color: red; margin-top: 10px;">
+        사용자 정보가 올바르지 않습니다.
+    </div>
+</div>
+</body>
+</html>
