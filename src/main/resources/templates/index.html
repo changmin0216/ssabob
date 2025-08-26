@@ -1,30 +1,190 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>SSABOB - 로그인</title>
+    <title>SSABOB - 오늘의 메뉴</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff');
+
+        :root {
+            --ssafy-blue: #004A94;
+            --ssafy-blue-light: #f0f4f8;
+            --ssafy-blue-dark: #003a75;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --card-border: #dee2e6;
+
+            /* 메뉴별 강조 색상 */
+            --color-korean: #D9534F;   /* 한식 - 빨강 */
+            --color-special: #F0AD4E;  /* 특식 - 주황 */
+            --color-lunchbox: #5CB85C; /* 도시락 - 초록 */
+            --color-brunch: #5BC0DE;   /* 브런치 - 하늘 */
+            --color-salad: #9B59B6;    /* 샐러드 - 보라 */
+        }
+
+        body {
+            background-color: var(--ssafy-blue-light);
+            color: var(--text-dark);
+            font-family: 'GmarketSansMedium', sans-serif; /* G마켓 산스 폰트 적용 */
+        }
+
+        .navbar {
+            background-color: white !important;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .navbar-brand {
+            color: var(--ssafy-blue) !important;
+            font-weight: 800;
+            font-size: 1.6rem;
+        }
+
+        .hero {
+            background: linear-gradient(45deg, var(--ssafy-blue), #007bff);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 5px solid var(--ssafy-blue-dark);
+        }
+        .hero h1 {
+            font-weight: 800;
+        }
+
+        .card {
+            border: 1px solid var(--card-border);
+            border-radius: 1.25rem; /* 모서리를 더 둥글게 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            font-weight: 700;
+            font-size: 1.25rem;
+            background-color: #ffffff;
+            border-bottom: 2px solid;
+            display: flex;
+            align-items: center;
+            border-top-left-radius: 1.25rem; /* 카드와 맞춤 */
+            border-top-right-radius: 1.25rem; /* 카드와 맞춤 */
+        }
+        .card-header .bi {
+            margin-right: 0.75rem;
+            font-size: 1.4rem;
+        }
+
+        /* 메뉴별 색상 적용 */
+        .card-header.korean { border-color: var(--color-korean); color: var(--color-korean); }
+        .card-header.special { border-color: var(--color-special); color: var(--color-special); }
+        .card-header.lunchbox { border-color: var(--color-lunchbox); color: var(--color-lunchbox); }
+        .card-header.brunch { border-color: var(--color-brunch); color: var(--color-brunch); }
+        .card-header.salad { border-color: var(--color-salad); color: var(--color-salad); }
+
+        .card-text {
+            white-space: pre-line; /* DB의 줄바꿈(\n)을 그대로 표시 */
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 2.5rem 0;
+            margin-top: 4rem;
+        }
+
+        .not-found-box {
+            background-color: white;
+            padding: 4rem;
+            border-radius: 1.25rem; /* 모서리를 더 둥글게 */
+            border: 1px solid var(--card-border);
+        }
+        .btn {
+            border-radius: 0.75rem; /* 버튼도 둥글게 */
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h1>로그인</h1>
-    <form action="/login" method="post">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">SSABOB</a>
         <div>
-            <label for="name">이름</label>
-            <input type="text" id="name" name="name" required>
+            <div th:if="${session.loginUser == null}">
+                <a href="/login" class="btn btn-primary" style="background-color: var(--ssafy-blue); border-color: var(--ssafy-blue);">로그인</a>
+            </div>
+            <div th:if="${session.loginUser != null}" class="d-flex align-items-center">
+                 <span class="navbar-text me-3">
+                     환영합니다, <strong th:text="${session.loginUser.name}" style="color: var(--ssafy-blue);">사용자</strong>님!
+                 </span>
+                <a href="/logout" class="btn btn-outline-secondary">로그아웃</a>
+            </div>
         </div>
-        <div>
-            <label for="region">지역</label>
-            <input type="text" id="region" name="region" required>
-        </div>
-        <div>
-            <label for="classInfo">반</label>
-            <input type="text" id="classInfo" name="classInfo" required>
-        </div>
-        <button type="submit">로그인</button>
-    </form>
-    <div th:if="${param.error}" style="color: red; margin-top: 10px;">
-        사용자 정보가 올바르지 않습니다.
     </div>
-</div>
+</nav>
+
+<header class="hero">
+    <div class="container">
+        <h1 class="display-4">오늘의 메뉴</h1>
+        <p class="lead" th:if="${menu != null}" th:text="${#temporals.format(menu.menuDate, 'yyyy년 MM월 dd일')} + ' | ' + ${menu.campus} + ' 캠퍼스'">날짜 및 캠퍼스</p>
+    </div>
+</header>
+
+<main class="container my-5">
+    <div th:if="${menu != null}">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header korean"><i class="bi bi-egg-fried"></i>한식 (20F)</div>
+                    <div class="card-body"><p class="card-text" th:text="${menu.koreanFood20f}"></p></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header special"><i class="bi bi-star-fill"></i>특식 (20F)</div>
+                    <div class="card-body"><p class="card-text" th:text="${menu.specialFood20f}"></p></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header lunchbox"><i class="bi bi-box-seam-fill"></i>도시락 (10F)</div>
+                    <div class="card-body"><p class="card-text" th:text="${menu.lunchBox10f}"></p></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header brunch"><i class="bi bi-cup-hot-fill"></i>브런치 (10F)</div>
+                    <div class="card-body"><p class="card-text" th:text="${menu.brunch10f}"></p></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header salad"><i class="bi bi-heart-fill"></i>샐러드 (10F)</div>
+                    <div class="card-body"><p class="card-text" th:text="${menu.salad10f}"></p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${menu == null}" class="text-center">
+        <div class="not-found-box">
+            <h2 class="text-muted">😢</h2>
+            <h3 class="text-muted my-3">오늘의 메뉴 정보가 없습니다.</h3>
+            <p class="text-muted">관리자가 아직 메뉴를 등록하지 않았나봐요!</p>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container text-center">
+        <p class="mb-0">&copy; 2025 SSABOB. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
