@@ -10,4 +10,5 @@ public class UserLoginRequestDto {
     private String name;
     private String region;
     private String classInfo;
+    private String messengerId;
 }

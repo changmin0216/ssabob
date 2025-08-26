@@ -35,7 +35,8 @@ public class UserController {
         Optional<User> loginUserOptional = userService.login(
                 requestDto.getName(),
                 requestDto.getRegion(),
-                requestDto.getClassInfo()
+                requestDto.getClassInfo(),
+                requestDto.getMessengerId()
         );
 
         // 사용자가 존재한다면 (로그인 성공)

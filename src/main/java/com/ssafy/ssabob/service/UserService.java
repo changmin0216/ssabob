@@ -22,8 +22,8 @@ public class UserService {
      * @param classInfo 반
      * @return 사용자가 존재하면 User 객체를, 없으면 비어있는 Optional을 반환
      */
-    public Optional<User> login(String name, String region, String classInfo) {
+    public Optional<User> login(String name, String region, String classInfo, String messengerId) {
         // Repository를 이용해 DB에서 해당 사용자가 있는지 조회
-        return userRepository.findByNameAndRegionAndClassInfo(name, region, classInfo);
+        return userRepository.findByNameAndRegionAndClassInfoAndMessengerId(name, region, classInfo, messengerId);
     }
 }
