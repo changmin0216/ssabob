@@ -21,4 +21,8 @@ public class User {
 
     @Column(nullable = false)
     private String classInfo;
+
+    // messengerId 필드 추가!
+    @Column(name = "messenger_id", nullable = false, unique = true)
+    private String messengerId;
 }
