@@ -1,34 +1,121 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">SSABOB</a>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">SSABOB</a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Left side links -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/posts">커뮤니티</a>
-                    </li>
-                </ul>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Left side links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/posts">커뮤니티</a>
+                </li>
+            </ul>
 
-                <!-- Right side buttons -->
-                <div class="d-flex">
-                    <div th:if="${session.loginUser == null}">
-                        <a href="/login" class="btn btn-primary" style="background-color: var(--ssafy-blue); border-color: var(--ssafy-blue);">로그인</a>
+            <!-- Right side buttons -->
+            <div class="d-flex align-items-center">
+                <div th:if="${session.loginUser == null}">
+                    <a href="/login" class="btn btn-primary" style="background-color: var(--ssafy-blue); border-color: var(--ssafy-blue);">로그인</a>
+                </div>
+                <div th:if="${session.loginUser != null}" class="d-flex align-items-center">
+
+                    <!-- 알림 드롭다운 -->
+                    <div class="dropdown me-2">
+                        <a href="#" class="text-secondary position-relative" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                0
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notification-list">
+                            <li><a class="dropdown-item text-muted" href="#">알림을 불러오는 중...</a></li>
+                        </ul>
                     </div>
-                    <div th:if="${session.loginUser != null}" class="d-flex align-items-center">
-                        <a th:href="@{/profile/{id}(id=${session.loginUser.id})}" class="btn btn-outline-primary me-2">내 프로필</a>
-                        <a href="/logout" class="btn btn-secondary">로그아웃</a>
-                    </div>
+
+                    <a th:href="@{/profile/{id}(id=${session.loginUser.id})}" class="btn btn-outline-primary me-2">내 프로필</a>
+                    <a href="/logout" class="btn btn-secondary">로그아웃</a>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        if (!notificationDropdown) return; // 로그인하지 않은 경우 스크립트 중단
+
+        const notificationBadge = document.getElementById('notification-badge');
+        const notificationList = document.getElementById('notification-list');
+
+        // 알림 목록 및 읽지 않은 개수 가져오기
+        function fetchNotifications() {
+            // 읽지 않은 개수 가져오기
+            fetch('/api/notifications/unread-count')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.count > 0) {
+                        notificationBadge.textContent = data.count;
+                        notificationBadge.style.display = 'block';
+                    } else {
+                        notificationBadge.style.display = 'none';
+                    }
+                });
+
+            // 전체 알림 목록 가져오기
+            fetch('/api/notifications')
+                .then(response => response.json())
+                .then(data => {
+                    notificationList.innerHTML = ''; // 기존 목록 비우기
+                    if (data.length === 0) {
+                        notificationList.innerHTML = '<li><a class="dropdown-item text-muted" href="#">새로운 알림이 없습니다.</a></li>';
+                        return;
+                    }
+
+                    data.forEach(notification => {
+                        const listItem = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = '#'; // 실제 이동은 click 이벤트에서 처리
+                        link.classList.add('dropdown-item');
+                        if (!notification.isRead) {
+                            link.classList.add('fw-bold');
+                        }
+                        link.dataset.notificationId = notification.id;
+                        link.dataset.relatedUrl = notification.relatedUrl;
+
+                        link.innerHTML = `<div>${notification.message}</div><div class="text-muted small">${new Date(notification.createdAt).toLocaleString()}</div>`;
+
+                        // 알림 클릭 이벤트
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const notifId = this.dataset.notificationId;
+                            const url = this.dataset.relatedUrl;
+
+                            // 알림을 읽음 처리
+                            fetch(`/api/notifications/${notifId}/read`, { method: 'POST' })
+                                .then(response => {
+                                    if (response.ok) {
+                                        window.location.href = url; // 성공 시 관련 URL로 이동
+                                    } else {
+                                        console.error('Failed to mark notification as read');
+                                        window.location.href = url; // 실패해도 일단 이동
+                                    }
+                                });
+                        });
+
+                        listItem.appendChild(link);
+                        notificationList.appendChild(listItem);
+                    });
+                });
+        }
+
+        fetchNotifications();
+    });
+</script>
 </body>
 </html>

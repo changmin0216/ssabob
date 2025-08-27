@@ -17,13 +17,19 @@ public class PostDetailResponseDto {
     private final String authorName;
     private final LocalDateTime createdAt;
 
-    // --- Phase 2 추가 필드 ---
+    // --- 약속(이벤트) 정보 ---
+    private final LocalDateTime eventTime;
+    private final String location;
+    private final int capacity;
+
+    // --- 상호작용 정보 ---
     private final long participantCount;
     private final boolean isUserParticipating;
-    private final List<CommentResponseDto> comments;
+    private final long likeCount;
+    private final boolean isUserLiking;
 
 
-    public PostDetailResponseDto(Post entity, long participantCount, boolean isUserParticipating, List<CommentResponseDto> comments) {
+    public PostDetailResponseDto(Post entity, long participantCount, boolean isUserParticipating, long likeCount, boolean isUserLiking, List<CommentResponseDto> comments) {
         this.id = entity.getId();
         this.category = entity.getCategory().getDescription();
         this.title = entity.getTitle();
@@ -31,8 +37,12 @@ public class PostDetailResponseDto {
         this.authorId = entity.getAuthor().getId();
         this.authorName = entity.getAuthor().getName();
         this.createdAt = entity.getCreatedAt();
+        this.eventTime = entity.getEventTime();
+        this.location = entity.getLocation();
+        this.capacity = entity.getCapacity();
         this.participantCount = participantCount;
         this.isUserParticipating = isUserParticipating;
-        this.comments = comments;
+        this.likeCount = likeCount;
+        this.isUserLiking = isUserLiking;
     }
 }

@@ -30,6 +30,23 @@
                 </div>
                 <div class="card-body p-4">
                     <form th:action="@{/profile}" th:method="post" th:object="${profile}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="track" class="form-label">트랙</label>
+                                <input type="text" id="track" name="track" class="form-control" th:value="*{track}" disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="statusBadge" class="form-label">상태 배지</label>
+                                <select id="statusBadge" name="statusBadge" class="form-select">
+                                    <option value="">선택 안함</option>
+                                    <option th:each="badge : ${T(com.ssafy.ssabob.domain.UserStatusBadge).values()}"
+                                            th:value="${badge.name()}"
+                                            th:text="${badge.getDescription()}"
+                                            th:selected="${badge.getDescription() == profile.statusBadge}"></option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="shortBio" class="form-label">한 줄 자기소개</label>
                             <input type="text" id="shortBio" name="shortBio" class="form-control" th:value="*{shortBio}">

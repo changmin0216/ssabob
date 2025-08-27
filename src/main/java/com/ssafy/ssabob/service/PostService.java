@@ -2,14 +2,10 @@ package com.ssafy.ssabob.service;
 
 import com.ssafy.ssabob.domain.Post;
 import com.ssafy.ssabob.domain.User;
-import com.ssafy.ssabob.dto.CommentResponseDto;
 import com.ssafy.ssabob.dto.PostCreateRequestDto;
 import com.ssafy.ssabob.dto.PostDetailResponseDto;
 import com.ssafy.ssabob.dto.PostListResponseDto;
-import com.ssafy.ssabob.repository.CommentRepository;
-import com.ssafy.ssabob.repository.ParticipationRepository;
-import com.ssafy.ssabob.repository.PostRepository;
-import com.ssafy.ssabob.repository.UserRepository;
+import com.ssafy.ssabob.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +20,6 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final ParticipationRepository participationRepository;
-    private final CommentRepository commentRepository;
 
     @Transactional
     public Long createPost(PostCreateRequestDto requestDto, String userMessengerId) {
@@ -38,9 +32,11 @@ public class PostService {
     }
 
     public List<PostListResponseDto> findAllPosts() {
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(PostListResponseDto::new)
-                .collect(Collectors.toList());
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
+        return posts.stream().map(post -> {
+            long participantCount = participationRepository.countByPost(post);
+            return new PostListResponseDto(post, participantCount, likeCount);
+        }).collect(Collectors.toList());
     }
 
     public PostDetailResponseDto findPostById(Long postId, User currentUser) {
@@ -54,13 +50,27 @@ public class PostService {
 
         // 참여자 수 조회
         long participantCount = participationRepository.countByPost(post);
+        // 좋아요 수 조회
 
-        // 현재 접속한 유저의 참여 여부 확인
+        // 현재 접속한 유저의 참여 및 좋아요 여부 확인
         boolean isUserParticipating = false;
+        boolean isUserLiking = false;
         if (currentUser != null) {
             isUserParticipating = participationRepository.findByUserAndPost(currentUser, post).isPresent();
         }
 
-        return new PostDetailResponseDto(post, participantCount, isUserParticipating, comments);
+        return new PostDetailResponseDto(post, participantCount, isUserParticipating, isUserLiking, comments);
+    }
+
+    @Transactional
+    public void cancelPost(Long postId, User currentUser) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다. id=" + postId));
+
+        if (!post.getAuthor().equals(currentUser)) {
+            throw new IllegalStateException("게시글을 취소할 권한이 없습니다.");
+        }
+
+        post.cancel();
     }
 }

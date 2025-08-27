@@ -35,6 +35,15 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
+    // --- 약속(이벤트) 정보 ---
+    private LocalDateTime eventTime;
+
+    @Column(length = 100)
+    private String location;
+
+    private int capacity;
+
+
     @CreationTimestamp // 엔티티 생성 시 자동으로 시간 기록
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -43,10 +52,13 @@ public class Post {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Post(PostCategory category, String title, String content, User author) {
+    public Post(PostCategory category, String title, String content, User author, LocalDateTime eventTime, String location, int capacity) {
         this.category = category;
         this.title = title;
         this.content = content;
         this.author = author;
+        this.eventTime = eventTime;
+        this.location = location;
+        this.capacity = capacity;
     }
 }

@@ -22,8 +22,8 @@ public class SsabobMenuService {
 //        LocalDate today = LocalDate.now();
 //        String campus = "서울";
 //        return lunchMenuRepository.findByMenuDateAndCampus(today, campus);
-        LocalDate today = LocalDate.now();
-//        LocalDate today = LocalDate.of(2025, 8, 25);
+//        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.of(2025, 8, 25);
         String campus = "SEOUL";
 
         // 1. DB에서 Entity 조회

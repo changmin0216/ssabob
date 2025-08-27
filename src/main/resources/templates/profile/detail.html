@@ -50,8 +50,9 @@
                     <p><strong>이름:</strong> <span th:text="${profile.name}"></span></p>
                     <p><strong>지역:</strong> <span th:text="${profile.region}"></span></p>
                     <p><strong>반:</strong> <span th:text="${profile.classInfo}"></span></p>
+                    <p><strong>트랙:</strong> <span th:text="${profile.track}"></span></p>
                     <div th:if="${profile.githubUrl}">
-                        <a th:href="${profile.githubUrl}" target="_blank" class="btn btn-dark w-100">
+                        <a th:href="${profile.githubUrl}" target="_blank" class="btn btn-dark w-100 mt-3">
                             <i class="bi bi-github"></i> GitHub 방문하기
                         </a>
                     </div>

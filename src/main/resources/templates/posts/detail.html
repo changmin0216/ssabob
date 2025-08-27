@@ -28,6 +28,9 @@
             font-size: 0.85rem;
             color: #6c757d;
         }
+        .info-list-group .list-group-item {
+            background-color: #fcfdff;
+        }
     </style>
 </head>
 <body>
@@ -40,41 +43,54 @@
             <!-- 게시글 상세 정보 카드 -->
             <div class="card mb-4">
                 <div class="card-header bg-white p-4">
-                    <span class="badge rounded-pill text-bg-primary mb-2" th:text="${post.category}"></span>
-                    <h1 class="card-title fs-2" th:text="${post.title}">게시글 제목</h1>
-                    <div class="d-flex justify-content-between align-items-center text-muted">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge rounded-pill text-bg-primary mb-2" th:text="${post.category}"></span>
+                            <h1 class="card-title fs-2" th:text="${post.title}">게시글 제목</h1>
+                        </div>
+                        <span class="badge fs-6"
+                              th:text="${post.status}"
+                              th:classappend="${post.status == '모집 중' ? 'text-bg-success' : 'text-bg-secondary'}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-muted mt-2">
                         <div>
                             <a th:href="@{/profile/{id}(id=${post.authorId})}" class="text-decoration-none fw-bold" th:text="${post.authorName}"></a>
                             <span class="mx-2">|</span>
                             <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
                         </div>
-                        <div th:if="${session.loginUser != null and session.loginUser.id == post.authorId}">
-                            <a href="#" class="btn btn-sm btn-outline-secondary">수정</a>
-                            <a href="#" class="btn btn-sm btn-outline-danger">삭제</a>
+                        <div th:if="${session.loginUser != null and session.loginUser.id == post.authorId}" class="d-flex">
+                            <a href="#" class="btn btn-sm btn-outline-secondary me-2">수정</a>
+                            <form th:if="${post.status == '모집 중'}" th:action="@{/posts/{postId}/cancel(postId=${post.id})}" method="post" onsubmit="return confirm('정말로 모임을 취소하시겠습니까?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">모임 취소</button>
+                            </form>
                         </div>
                     </div>
                 </div>
                 <div class="card-body p-4">
+                    <!-- 약속 정보 -->
+                    <ul class="list-group list-group-flush mb-4 info-list-group">
+                        <li class="list-group-item"><i class="bi bi-calendar-check me-2"></i><strong>시간:</strong> <span th:text="${#temporals.format(post.eventTime, 'yyyy년 MM월 dd일 HH:mm')}"></span></li>
+                        <li class="list-group-item"><i class="bi bi-geo-alt-fill me-2"></i><strong>장소:</strong> <span th:text="${post.location}"></span></li>
+                        <li class="list-group-item"><i class="bi bi-people-fill me-2"></i><strong>참여 현황:</strong> <span th:text="${post.participantCount} + ' / ' + ${post.capacity}"></span>명</li>
+                    </ul>
+                    <!-- 본문 -->
                     <div class="post-content" th:text="${post.content}"></div>
                 </div>
             </div>
 
-            <!-- 참여하기 버튼 -->
-            <div class="d-grid gap-2 mb-5">
-                <button th:if="${post.isUserParticipating}" id="participation-btn" class="btn btn-danger btn-lg">참여 취소</button>
-                <button th:unless="${post.isUserParticipating}" id="participation-btn" class="btn btn-success btn-lg">참여하기</button>
-                <div class="text-center text-muted mt-2">
-                    현재 <strong th:text="${post.participantCount}">0</strong>명이 참여 중입니다.
-                </div>
+            <!-- 참여 및 좋아요 버튼 -->
+            <div class="d-flex justify-content-center gap-3 mb-5">
+                <button th:if="${post.isUserLiking}" id="like-btn" class="btn btn-danger btn-lg flex-grow-1"><i class="bi bi-heart-fill"></i> 좋아요 취소 (<span th:text="${post.likeCount}"></span>)</button>
+                <button th:unless="${post.isUserLiking}" id="like-btn" class="btn btn-outline-danger btn-lg flex-grow-1"><i class="bi bi-heart"></i> 좋아요 (<span th:text="${post.likeCount}"></span>)</button>
+
+                <button th:if="${post.isUserParticipating}" id="participation-btn" class="btn btn-warning btn-lg flex-grow-1">참여 취소</button>
+                <button th:unless="${post.isUserParticipating}" id="participation-btn" class="btn btn-success btn-lg flex-grow-1">참여하기</button>
             </div>
 
-            <!-- 댓글 목록 및 작성 폼 -->
+            <!-- 댓글 -->
             <div class="card">
-                <div class="card-header fs-5 fw-bold">
-                    <i class="bi bi-chat-dots-fill"></i> 댓글
-                </div>
+                <div class="card-header fs-5 fw-bold"><i class="bi bi-chat-dots-fill"></i> 댓글</div>
                 <div class="card-body">
-                    <!-- 댓글 목록 -->
                     <div th:if="${!post.comments.isEmpty()}">
                         <div th:each="comment : ${post.comments}" class="d-flex flex-start mb-3">
                             <div class="flex-grow-1 flex-shrink-1">
@@ -84,6 +100,10 @@
                                             <a th:href="@{/profile/{id}(id=${comment.authorId})}" class="text-decoration-none comment-author" th:text="${comment.authorName}"></a>
                                             <span class="comment-date ms-2" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
                                         </p>
+                                        <!-- 댓글 삭제 버튼 -->
+                                        <form th:if="${session.loginUser != null and session.loginUser.id == comment.authorId}" th:action="@{/comments/{commentId}/delete(commentId=${comment.id})}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                                        </form>
                                     </div>
                                     <p class="small mb-0" th:text="${comment.content}"></p>
                                 </div>
@@ -91,10 +111,7 @@
                         </div>
                     </div>
                     <p th:if="${post.comments.isEmpty()}" class="text-muted">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
-
                     <hr>
-
-                    <!-- 댓글 작성 폼 (로그인 시에만 보임) -->
                     <div th:if="${session.loginUser != null}">
                         <form th:action="@{/posts/{postId}/comments(postId=${post.id})}" method="post">
                             <div class="mb-3">
@@ -118,30 +135,35 @@
 
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
+        const postId = [[${post.id}]];
+
+        // 참여 버튼 이벤트 리스너
         const participationButton = document.getElementById('participation-btn');
         if (participationButton) {
             participationButton.addEventListener('click', function() {
-                const postId = [[${post.id}]];
-                const url = `/api/posts/${postId}/participate`;
-
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
+                fetch(`/api/posts/${postId}/participate`, { method: 'POST' })
                 .then(response => {
-                    if (response.ok) {
-                        // 성공 시 페이지를 새로고침하여 참여 상태와 인원 수를 갱신
-                        location.reload();
-                    } else if (response.status === 401) {
+                    if (response.ok) location.reload();
+                    else if (response.status === 401) {
                         alert('로그인이 필요합니다.');
                         window.location.href = '/login';
-                    } else {
-                        alert('요청에 실패했습니다.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+                    } else alert('요청에 실패했습니다.');
+                }).catch(error => console.error('Error:', error));
+            });
+        }
+
+        // 좋아요 버튼 이벤트 리스너
+        const likeButton = document.getElementById('like-btn');
+        if (likeButton) {
+            likeButton.addEventListener('click', function() {
+                fetch(`/api/posts/${postId}/like`, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) location.reload();
+                    else if (response.status === 401) {
+                        alert('로그인이 필요합니다.');
+                        window.location.href = '/login';
+                    } else alert('요청에 실패했습니다.');
+                }).catch(error => console.error('Error:', error));
             });
         }
     });

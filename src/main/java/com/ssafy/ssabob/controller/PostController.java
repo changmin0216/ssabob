@@ -55,4 +55,17 @@ public class PostController {
         model.addAttribute("post", post);
         return "posts/detail";
     }
+
+    // 5. 게시글 취소 처리
+    @PostMapping("/{id}/cancel")
+    public String cancelPost(@PathVariable Long id, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        postService.cancelPost(id, loginUser);
+
+        return "redirect:/posts/" + id;
+    }
 }

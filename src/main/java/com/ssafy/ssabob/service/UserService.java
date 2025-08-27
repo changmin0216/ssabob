@@ -40,11 +40,16 @@ public class UserService {
         User user = userRepository.findByMessengerId(userMessengerId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. id=" + userMessengerId));
 
+        UserStatusBadge statusBadge = null;
+        if (requestDto.getStatusBadge() != null && !requestDto.getStatusBadge().isEmpty()) {
+            statusBadge = UserStatusBadge.valueOf(requestDto.getStatusBadge());
+        }
+
         user.updateProfile(
                 requestDto.getShortBio(),
                 requestDto.getGithubUrl(),
                 requestDto.getTechStacks(),
-                requestDto.getInterestFields()
+                requestDto.getInterestFields(),
         );
     }
 }
